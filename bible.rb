@@ -1,3 +1,4 @@
+require 'launchy'
 require './correct_bibles.rb' #gives us global variable $bible_collection
 
 module Menuable
@@ -26,28 +27,55 @@ module Menuable
 end
 
 
+module Displayable
+	attr_accessor :separator
 
-class Bible
-	include Menuable
-
-	attr_accessor :bible, :books, :version, :top_menu, :separator
 	
-	def initialize(version, scripture_hash)
-		@bible = scripture_hash
-		@books = @bible.keys
-		@version = version
-		@top_menu = ["Choose Book and Chapter", "Passage Lookup", "Past Searches", "Proverb of the Day", "Psalms of the Day", "Quit"]
-		@separator = "-" * 80
+	def separator
+		@separator = "-" * 80 + "\n"
 	end
-
-
+	
+	
 	def clear_screen
 		system "clear" or system "cls"
 	end
 
+
 	def wrap(s, width=70)
 	  s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n  ")
 	end
+
+
+	def display(content, destination = 'terminal', path_to_temp_file = './temp_contents.html')	
+		case destination
+		when 'terminal'
+			puts content
+			run("", false)
+		when 'browser'	
+			File.write(path_to_temp_file, "<html><body><pre>#{content}</pre></body></html>")
+			Launchy.open(path_to_temp_file)
+			puts "Displaying results in browser."
+			run("", false)
+		end
+	end
+end
+
+
+
+class Bible
+	include Menuable
+	include Displayable
+
+	attr_accessor :bible, :books, :version, :top_menu, :where_to_display
+	
+	def initialize(version, scripture_hash, where_to_display)
+		@bible = scripture_hash
+		@books = @bible.keys
+		@version = version
+		@top_menu = ["Choose Book and Chapter", "Passage Lookup", "Past Searches", "Proverb of the Day", "Psalms of the Day", "Proverb and Psalms of the Day", "Quit"]
+		@where_to_display = where_to_display.downcase
+	end
+
 
 
 	def run(flash_message = "", clear_first = true)
@@ -74,14 +102,14 @@ class Bible
 		puts chosen_book.upcase + "\n"
 		available_chapters = bible[chosen_book].keys.map(&:to_i).sort
 		chosen_chapter = user_choice(available_chapters, "Select a chapter")
-		display_passage("#{chosen_book} #{chosen_chapter.to_s}")
+		display(make_passage("#{chosen_book} #{chosen_chapter.to_s}"), where_to_display)
 	end
 
 
 	def passage_lookup
 		puts "Enter a passage (e.g. Romans 3:5-10 or 1 John 2): "
 		passage_string = gets.chomp.strip.downcase
-		display_passage(passage_string)
+		display(make_passage(passage_string), where_to_display)
 	end
 
 
@@ -90,26 +118,39 @@ class Bible
 	end
 
 
-	def proverb_of_the_day
+	def proverb_of_the_day(display_it = true)
 		date_day = Time.now.day.to_s
-		display_passage("Proverbs #{date_day}")
+		passage = make_passage("Proverbs #{date_day}")
+		display(passage, where_to_display) if display_it == true
+		return passage
 	end
 
-	def psalms_of_the_day
+
+	def psalms_of_the_day(display_it = true)
 		date_day = Time.now.day
+		assembled_psalms = ""
 		until (chapter_number ||= date_day) > 150
-			display_passage("Psalms #{chapter_number}", false)
+			assembled_psalms += make_passage("Psalms #{chapter_number}")
 			chapter_number += 30
 		end
-		run("", false)
+		display(assembled_psalms, where_to_display) if display_it == true
+		return assembled_psalms
 	end
 
 
-	def display_passage(input, run_after = true)
+	def proverb_and_psalms_of_the_day
+		assembled_passages = proverb_of_the_day(false) + psalms_of_the_day(false)
+		display(assembled_passages, where_to_display)
+	end
 
-		abbreviations = ['1st', '2nd', '3rd', 'gen', 'ex', 'lev', 'num', 'deut', 'josh', 'jdg', 'jdgs', '1sam', '2sam', 'sam', '1kings', '2kings', '1chron', '2chron', 'chron', 'neh', 'ps', 'prov', 'eccl', 'song', 'songs', 'is', 'jer', 'lam', 'ezek', 'dan', 'hos', 'ob', 'hab', 'zeph', 'hag', 'zech', 'mal', 'mt', 'matt', 'mk', 'lk', 'jn', 'rom', '1cor', '2cor', 'cor', 'gal', 'eph', 'phil', 'philip', 'col', 'coloss', '1thess', '2thess', 'thess', '1tim', '2tim', 'tim', 'tit', 'ti', 'philem', 'heb', 'jas', '1john', '2john', '3john', 'rev']
-		replacements = ['1', '2', '3', 'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Judges', '1 Samuel', '2 Samuel', 'Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Chronicles', 'Nehemiah', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Obadiah', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Matthew', 'Mark', 'Luke', 'John', 'Romans', '1 Corinthians', '2 Corinthians', 'Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Philippians', 'Colossians', 'Colossians', '1 Thessalonians', '2 Thessalonians', 'Thessalonians', '1 Timothy', '2 Timothy', 'Timothy', 'Titus', 'Titus', 'Philemon', 'Hebrews', 'James', '1 John', '2 John', '3 John', 'Revelation']
 
+	def make_passage(input)
+
+		abbreviations = ['1st ', '2nd ', '3rd ', 'gen ', 'ex ', 'lev ', 'num ', 'deut ', 'josh ', 'jdg ', 'jdgs ', '1sam ', '2sam ', 'sam ', '1kings ', '2kings ', '1chron ', '2chron ', 'chron ', 'neh ', 'ps ', 'prov ', 'eccl ', 'song ', 'songs ', 'is ', 'jer ', 'lam ', 'ezek ', 'dan ', 'hos ', 'ob ', 'hab ', 'zeph ', 'hag ', 'zech ', 'mal ', 'mt ', 'matt ', 'mk ', 'lk ', 'jn ', 'rom ', '1cor ', '2cor ', 'cor ', 'gal ', 'eph ', 'phil ', 'philip ', 'col ', 'coloss ', '1thess ', '2thess ', 'thess ', '1tim ', '2tim ', 'tim ', 'tit ', 'ti ', 'philem ', 'heb ', 'jas ', '1john ', '2john ', '3john ', 'rev ', 'esIsaiah']
+		
+		replacements = ['1 ', '2 ', '3 ', 'Genesis ', 'Exodus ', 'Leviticus ', 'Numbers ', 'Deuteronomy ', 'Joshua ', 'Judges ', 'Judges ', '1 Samuel ', '2 Samuel ', 'Samuel ', '1 Kings ', '2 Kings ', '1 Chronicles ', '2 Chronicles ', 'Chronicles ', 'Nehemiah ', 'Psalms ', 'Proverbs ', 'Ecclesiastes ', 'Song of Solomon ', 'Song of Solomon ', 'Isaiah ', 'Jeremiah ', 'Lamentations ', 'Ezekiel ', 'Daniel ', 'Hosea ', 'Obadiah ', 'Habakkuk ', 'Zephaniah ', 'Haggai ', 'Zechariah ', 'Malachi ', 'Matthew ', 'Matthew ', 'Mark ', 'Luke ', 'John ', 'Romans ', '1 Corinthians ', '2 Corinthians ', 'Corinthians ', 'Galatians ', 'Ephesians ', 'Philippians ', 'Philippians ', 'Colossians ', 'Colossians ', '1 Thessalonians ', '2 Thessalonians ', 'Thessalonians ', '1 Timothy ', '2 Timothy ', 'Timothy ', 'Titus ', 'Titus ', 'Philemon ', 'Hebrews ', 'James ', '1 John ', '2 John ', '3 John ', 'Revelation ', 'esis']
+
+		
 		abbreviations.each_with_index do |str, index|
 			input.gsub!(str, replacements[index])
 		end
@@ -148,24 +189,28 @@ class Bible
 			bible[book][chapter].keys.each {|verse_number| verses << verse_number } # store every verse in the chapter in verses
 		end
 
-		clear_screen
-		
-		puts separator + "\n#{input.upcase}\n" + separator
+		content = separator + "#{input.upcase}\n" + separator
 		
 		verses.sort_by(&:to_i).each do |verse|
 			verse_text = wrap(bible[book][chapter][verse])
-			puts "#{verse}. " + verse_text
+			content += "\n#{verse}. " + verse_text
 		end
 		
-		puts "\n -#{version}\n#{separator} \n\n\n" 
-		run("", false) if run_after == true
+		return content += "\n-#{version}\n#{separator}\n\n" 
 	end
 end
+	
+
 
 include Menuable
-Bible.new("generic", {}).clear_screen
+include Displayable
+
+clear_screen
 puts "Choose a Bible Version:"
 version_to_load = user_choice($bible_collection.keys)
-bible_to_run = Bible.new("#{version_to_load.upcase}", $bible_collection[version_to_load])
+display_options = ["Terminal", "Browser"]
+puts "Choose where to display the Bible text:"
+where_to_display = user_choice(display_options)
 
+bible_to_run = Bible.new("#{version_to_load.upcase}", $bible_collection[version_to_load], where_to_display)
 bible_to_run.run("Welcome")
