@@ -37,7 +37,7 @@ class Bible
 		@books = @bible.keys
 		@version = version
 		@top_menu = ["Choose Book and Chapter", "Passage Lookup", "Past Searches", "Quit"]
-		@separator = "-" * 70
+		@separator = "-" * 80
 	end
 
 
@@ -45,7 +45,7 @@ class Bible
 		system "clear" or system "cls"
 	end
 
-	def wrap(s, width=80)
+	def wrap(s, width=70)
 	  s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n  ")
 	end
 
@@ -142,7 +142,7 @@ class Bible
 			puts "#{verse}. " + verse_text
 		end
 		
-		puts "\n -#{version} \n\n\n"
+		puts "\n -#{version}\n#{separator} \n\n\n" 
 		run("", false)
 	end
 end
