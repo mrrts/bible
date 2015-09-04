@@ -1,0 +1,9 @@
+I would like to write some OO software that includes modules that allows us to look up a bible passage with the reference, search for passages that contain a query string, and display past queries.
+
+We should also be able to assemble a list of passages for whatever purpose. 
+
+OBJECT: list of passages
+
+OBJECT: Query event / viewable in history
+
+OBJECT: 
