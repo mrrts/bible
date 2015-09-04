@@ -36,7 +36,7 @@ class Bible
 		@bible = scripture_hash
 		@books = @bible.keys
 		@version = version
-		@top_menu = ["Choose Book and Chapter", "Passage Lookup", "Past Searches", "Quit"]
+		@top_menu = ["Choose Book and Chapter", "Passage Lookup", "Past Searches", "Proverb of the Day", "Psalms of the Day", "Quit"]
 		@separator = "-" * 80
 	end
 
@@ -90,7 +90,22 @@ class Bible
 	end
 
 
-	def display_passage(input)
+	def proverb_of_the_day
+		date_day = Time.now.day.to_s
+		display_passage("Proverbs #{date_day}")
+	end
+
+	def psalms_of_the_day
+		date_day = Time.now.day
+		until (chapter_number ||= date_day) > 150
+			display_passage("Psalms #{chapter_number}", false)
+			chapter_number += 30
+		end
+		run("", false)
+	end
+
+
+	def display_passage(input, run_after = true)
 
 		abbreviations = ['1st', '2nd', '3rd', 'gen', 'ex', 'lev', 'num', 'deut', 'josh', 'jdg', 'jdgs', '1sam', '2sam', 'sam', '1kings', '2kings', '1chron', '2chron', 'chron', 'neh', 'ps', 'prov', 'eccl', 'song', 'songs', 'is', 'jer', 'lam', 'ezek', 'dan', 'hos', 'ob', 'hab', 'zeph', 'hag', 'zech', 'mal', 'mt', 'matt', 'mk', 'lk', 'jn', 'rom', '1cor', '2cor', 'cor', 'gal', 'eph', 'phil', 'philip', 'col', 'coloss', '1thess', '2thess', 'thess', '1tim', '2tim', 'tim', 'tit', 'ti', 'philem', 'heb', 'jas', '1john', '2john', '3john', 'rev']
 		replacements = ['1', '2', '3', 'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Judges', '1 Samuel', '2 Samuel', 'Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Chronicles', 'Nehemiah', 'Psalms', 'Proverbs', 'Ecclesiastes', 'Song of Solomon', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Obadiah', 'Habakkuk', 'Zephaniah', 'Haggai', 'Zechariah', 'Malachi', 'Matthew', 'Matthew', 'Mark', 'Luke', 'John', 'Romans', '1 Corinthians', '2 Corinthians', 'Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Philippians', 'Colossians', 'Colossians', '1 Thessalonians', '2 Thessalonians', 'Thessalonians', '1 Timothy', '2 Timothy', 'Timothy', 'Titus', 'Titus', 'Philemon', 'Hebrews', 'James', '1 John', '2 John', '3 John', 'Revelation']
@@ -143,7 +158,7 @@ class Bible
 		end
 		
 		puts "\n -#{version}\n#{separator} \n\n\n" 
-		run("", false)
+		run("", false) if run_after == true
 	end
 end
 
