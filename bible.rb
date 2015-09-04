@@ -50,8 +50,8 @@ class Bible
 	end
 
 
-	def run(flash_message = "")
-		clear_screen
+	def run(flash_message = "", clear_first = true)
+		clear_screen if clear_first == true
 		puts flash_message
 		puts "Bible Version: #{version}"
 		puts "Make your selection below:"
@@ -109,7 +109,7 @@ class Bible
 			book = query[0].capitalize # book name without ordinal e.g. "Romans"
 			chapverse = query[1]
 		else
-			if query[0].downcase.include?('song')
+			if query[0].downcase.include?('song') # Song of Solomon special case
 				book = "Song of Solomon"
 				chapverse = query[3]
 			else
@@ -119,7 +119,7 @@ class Bible
 		
 		verses = []
 		
-		if chapverse.include?(':') # we want specific verses
+		if chapverse.include?(':') # we want specific verse(s)
 			chapter = chapverse.split(':').first  
 			verse_statement = chapverse.split(':').last
 			if verse_statement.include?('-')  # it's a range of verses
@@ -143,6 +143,7 @@ class Bible
 		end
 		
 		puts "\n -#{version} \n\n\n"
+		run("", false)
 	end
 end
 
