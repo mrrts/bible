@@ -1,5 +1,6 @@
 require 'launchy'
 require 'yaml'
+require 'time'
 require './correct_bibles.rb' #gives us global variable $bible_collection
 
 module Menuable
@@ -64,6 +65,8 @@ module Historyable
 		if File.exist?("history.yml")
 			@history = YAML.load_file("history.yml")
 			@history ||= []
+		else
+			
 		end
 	end
 
@@ -72,6 +75,14 @@ module Historyable
 		File.open('history.yml', 'w') do |file|
 			file.write(@history.to_yaml)
 		end
+	end
+
+	def clear_history
+		@history = []
+		File.open('history.yml', 'w') do |file|
+			file.write(@history.to_yaml)
+		end
+		run("History cleared")
 	end
 end
 
@@ -82,7 +93,7 @@ class Bible
 	include Displayable
 	include Historyable
 
-	attr_accessor :bible, :books, :version, :top_menu, :where_to_display
+	attr_accessor :bible, :books, :version, :top_menu, :where_to_display, :history
 
 	
 	def initialize(version, scripture_hash, where_to_display)
@@ -98,7 +109,7 @@ class Bible
 
 	def run(flash_message = "", clear_first = true)
 		clear_screen if clear_first == true
-		puts flash_message
+		puts flash_message + "\n"
 		puts "Bible Version: #{version}"
 		puts "Make your selection below:"
 		puts separator
@@ -136,7 +147,28 @@ class Bible
 
 
 	def history
-
+		puts "Choose a passage to look up again: "
+		if @history.any?
+			items = []
+			@history.each_with_index do |entry, index|
+				entry.each do |key, value|
+					t = Time.parse(key)
+					items.push("#{t.strftime("%e %b %Y %l:%M%p")}: #{value}")
+				end
+			end
+			items.push("Clear History", "Go Back")
+			choice = user_choice(items) # .split(': ')[1]
+			if choice == "Clear History"
+				clear_history
+			elsif choice == "Go Back"
+				run()
+			else
+				passage = choice.split(': ')[1]
+				display(make_passage(passage), where_to_display)
+			end
+		else
+			run("***History is empty***")
+		end
 	end
 
 
