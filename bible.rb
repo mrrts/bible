@@ -1,4 +1,5 @@
 require 'launchy'
+require 'yaml'
 require './correct_bibles.rb' #gives us global variable $bible_collection
 
 module Menuable
@@ -28,9 +29,6 @@ end
 
 
 module Displayable
-	attr_accessor :separator
-
-	
 	def separator
 		@separator = "-" * 80 + "\n"
 	end
@@ -48,10 +46,10 @@ module Displayable
 
 	def display(content, destination = 'terminal', path_to_temp_file = './temp_contents.html')	
 		case destination
-		when 'terminal'
+		when 'Terminal'
 			puts content
 			run("", false)
-		when 'browser'	
+		when 'Browser'	
 			File.write(path_to_temp_file, "<html><body><pre>#{content}</pre></body></html>")
 			Launchy.open(path_to_temp_file)
 			puts "Displaying results in browser."
@@ -61,19 +59,46 @@ module Displayable
 end
 
 
+module Historyable
+	def history
+		@history ||= {}
+	end
+
+	def history=(passage="undefined")
+		@history["#{Time.now}"] = passage
+	end
+
+	def read_history
+		if File.exist?("history.yml")
+			@history = YAML.load_file("history.yml")
+			puts @history.inspect
+		end
+	end
+
+	def save_to_history(passage)
+		puts 'calling save_to_history'
+		puts history.inspect
+		history.store({"#{Time.now}" => passage})
+		File.write('./history.yml', "#{history.to_yaml}")
+	end
+end
+
+
 
 class Bible
 	include Menuable
 	include Displayable
+	include Historyable
 
 	attr_accessor :bible, :books, :version, :top_menu, :where_to_display
+
 	
 	def initialize(version, scripture_hash, where_to_display)
 		@bible = scripture_hash
 		@books = @bible.keys
 		@version = version
-		@top_menu = ["Choose Book and Chapter", "Passage Lookup", "Past Searches", "Proverb of the Day", "Psalms of the Day", "Proverb and Psalms of the Day", "Quit"]
-		@where_to_display = where_to_display.downcase
+		@top_menu = ["Choose Book and Chapter", "Passage Lookup", "Proverb of the Day", "Psalms of the Day", "Proverb and Psalms of the Day", "History", "Quit"]
+		@where_to_display = where_to_display
 	end
 
 
@@ -83,6 +108,7 @@ class Bible
 		puts flash_message
 		puts "Bible Version: #{version}"
 		puts "Make your selection below:"
+		read_history
 		puts separator
 		selection = user_choice(top_menu)
 		clear_screen
@@ -102,18 +128,22 @@ class Bible
 		puts chosen_book.upcase + "\n"
 		available_chapters = bible[chosen_book].keys.map(&:to_i).sort
 		chosen_chapter = user_choice(available_chapters, "Select a chapter")
-		display(make_passage("#{chosen_book} #{chosen_chapter.to_s}"), where_to_display)
+		passage = "#{chosen_book} #{chosen_chapter.to_s}"
+		save_to_history(passage)
+		puts separator
+		display(make_passage(passage), where_to_display)
 	end
 
 
 	def passage_lookup
 		puts "Enter a passage (e.g. Romans 3:5-10 or 1 John 2): "
 		passage_string = gets.chomp.strip.downcase
+		save_to_history(passage_string)
 		display(make_passage(passage_string), where_to_display)
 	end
 
 
-	def past_searches
+	def history
 
 	end
 
