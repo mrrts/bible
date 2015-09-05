@@ -60,26 +60,18 @@ end
 
 
 module Historyable
-	def history
-		@history ||= {}
-	end
-
-	def history=(passage="undefined")
-		@history["#{Time.now}"] = passage
-	end
-
 	def read_history
 		if File.exist?("history.yml")
 			@history = YAML.load_file("history.yml")
-			puts @history.inspect
+			@history ||= []
 		end
 	end
 
 	def save_to_history(passage)
-		puts 'calling save_to_history'
-		puts history.inspect
-		history.store({"#{Time.now}" => passage})
-		File.write('./history.yml', "#{history.to_yaml}")
+		@history.push({"#{Time.now}" => passage})
+		File.open('history.yml', 'w') do |file|
+			file.write(@history.to_yaml)
+		end
 	end
 end
 
@@ -94,6 +86,7 @@ class Bible
 
 	
 	def initialize(version, scripture_hash, where_to_display)
+		read_history
 		@bible = scripture_hash
 		@books = @bible.keys
 		@version = version
@@ -108,7 +101,6 @@ class Bible
 		puts flash_message
 		puts "Bible Version: #{version}"
 		puts "Make your selection below:"
-		read_history
 		puts separator
 		selection = user_choice(top_menu)
 		clear_screen
