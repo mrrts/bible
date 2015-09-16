@@ -1,6 +1,0 @@
-to do:
-
--readme file
--ability to lookup several chapters / range of chapters
--add KJV version
--add ability to save preferences (version and where to display)
