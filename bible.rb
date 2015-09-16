@@ -40,18 +40,31 @@ module Displayable
 	end
 
 
-	def wrap(s, width=70)
-	  s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n  ")
+	def wrap(s, width = 70, leading_numeral)
+		if leading_numeral.to_i < 10 and leading_numeral.to_i != 0
+			indent = "   "
+		elsif leading_numeral.to_i >= 10
+			indent = "    "
+		else
+			indent = ""
+		end
+		s.gsub(/(.{1,#{width}})(\s+|\Z)/, "\\1\n#{indent}")
 	end
 
 
+	def strip_html(html_string)
+		html_string.gsub(%r{</?[^>]+?>}, '')
+	end
+
+	
 	def display(content, destination = 'terminal', path_to_temp_file = './temp_contents.html')	
 		case destination
 		when 'Terminal'
-			puts content
+			puts strip_html(content)
 			run("", false)
 		when 'Browser'	
-			File.write(path_to_temp_file, "<html><body><pre>#{content}</pre></body></html>")
+			content = content.gsub(separator, "\n")
+			File.write(path_to_temp_file, "<html><head><link rel='stylesheet' type='text/css' href='browser_display.css'></head><body>#{content}</body></html>")
 			Launchy.open(path_to_temp_file)
 			puts "Displaying results in browser."
 			run("", false)
@@ -157,7 +170,7 @@ class Bible
 				end
 			end
 			items.push("Clear History", "Go Back")
-			choice = user_choice(items) # .split(': ')[1]
+			choice = user_choice(items) 
 			if choice == "Clear History"
 				clear_history
 			elsif choice == "Go Back"
@@ -199,14 +212,9 @@ class Bible
 
 
 	def make_passage(input)
-
-		abbreviations = ['1st ', '2nd ', '3rd ', 'gen ', 'ex ', 'lev ', 'num ', 'deut ', 'josh ', 'jdg ', 'jdgs ', '1sam ', '2sam ', 'sam ', '1kings ', '2kings ', '1chron ', '2chron ', 'chron ', 'neh ', 'ps ', 'prov ', 'eccl ', 'song ', 'songs ', 'is ', 'jer ', 'lam ', 'ezek ', 'dan ', 'hos ', 'ob ', 'hab ', 'zeph ', 'hag ', 'zech ', 'mal ', 'mt ', 'matt ', 'mk ', 'lk ', 'jn ', 'rom ', '1cor ', '2cor ', 'cor ', 'gal ', 'eph ', 'phil ', 'philip ', 'col ', 'coloss ', '1thess ', '2thess ', 'thess ', '1tim ', '2tim ', 'tim ', 'tit ', 'ti ', 'philem ', 'heb ', 'jas ', '1john ', '2john ', '3john ', 'rev ', 'esIsaiah']
 		
-		replacements = ['1 ', '2 ', '3 ', 'Genesis ', 'Exodus ', 'Leviticus ', 'Numbers ', 'Deuteronomy ', 'Joshua ', 'Judges ', 'Judges ', '1 Samuel ', '2 Samuel ', 'Samuel ', '1 Kings ', '2 Kings ', '1 Chronicles ', '2 Chronicles ', 'Chronicles ', 'Nehemiah ', 'Psalms ', 'Proverbs ', 'Ecclesiastes ', 'Song of Solomon ', 'Song of Solomon ', 'Isaiah ', 'Jeremiah ', 'Lamentations ', 'Ezekiel ', 'Daniel ', 'Hosea ', 'Obadiah ', 'Habakkuk ', 'Zephaniah ', 'Haggai ', 'Zechariah ', 'Malachi ', 'Matthew ', 'Matthew ', 'Mark ', 'Luke ', 'John ', 'Romans ', '1 Corinthians ', '2 Corinthians ', 'Corinthians ', 'Galatians ', 'Ephesians ', 'Philippians ', 'Philippians ', 'Colossians ', 'Colossians ', '1 Thessalonians ', '2 Thessalonians ', 'Thessalonians ', '1 Timothy ', '2 Timothy ', 'Timothy ', 'Titus ', 'Titus ', 'Philemon ', 'Hebrews ', 'James ', '1 John ', '2 John ', '3 John ', 'Revelation ', 'esis']
-
-		
-		abbreviations.each_with_index do |str, index|
-			input.gsub!(str, replacements[index])
+		$abbreviations.each_with_index do |str, index| # arrays defined in correct_bibles.rb
+			input.gsub!(str, $replacements[index])
 		end
 
 		query = input.downcase.chomp.strip.split # splits at spaces
@@ -243,14 +251,14 @@ class Bible
 			bible[book][chapter].keys.each {|verse_number| verses << verse_number } # store every verse in the chapter in verses
 		end
 
-		content = separator + "#{input.upcase}\n" + separator
+		content = "\n<div class='passage'>\n" + separator + "<h2>#{input.upcase}\n</h2>" + separator
 		
 		verses.sort_by(&:to_i).each do |verse|
-			verse_text = wrap(bible[book][chapter][verse])
-			content += "\n#{verse}. " + verse_text
+			verse_text = wrap(bible[book][chapter][verse], 70, verse)
+			content += "<p class='verse'>\n<span class='verse_number'>#{verse}.</span> " + verse_text + "</p>"
 		end
 		
-		return content += "\n-#{version}\n#{separator}\n\n" 
+		return content += "\n<div class='citation'>- #{version}</div>\n#{separator}\n</div><!--.passage-->\n" 
 	end
 end
 	
