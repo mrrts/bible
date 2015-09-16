@@ -75,12 +75,11 @@ end
 
 module Historyable
 	def read_history
-		if File.exist?("history.yml")
-			@history = YAML.load_file("history.yml")
-			@history ||= []
-		else
-			
+		@history ||= []
+		if !File.exist?("history.yml")
+			File.open("history.yml", 'w') {|f| f.write("") }
 		end
+		@history = YAML.load_file("history.yml")
 	end
 
 	def save_to_history(passage)
