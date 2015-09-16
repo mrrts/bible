@@ -1,7 +1,7 @@
 require 'launchy'
 require 'yaml'
 require 'time'
-require './correct_bibles.rb' #gives us global variable $bible_collection
+require './correct_order_bibles.rb' #gives us global variables $bible_collection, $abbreviations, $replacements
 
 module Menuable
 	def make_numbered_list(array)
