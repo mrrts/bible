@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:700,400,300');
+@font-face {
+font-family: 'Open Sans';
+font-style: normal;
+src: url('fonts/open_sans/Open%20Sans%20300.ttf') format('ttf');
+}
 
 
 body {
