@@ -64,7 +64,7 @@ module Displayable
 			run("", false)
 		when 'Browser'	
 			content = content.gsub(separator, "\n")
-			File.write(path_to_temp_file, "<html>\n<head>\n<link rel='stylesheet' type='text/css' href='browser_display.css'>\n</head>\n<body>\n#{content}\n</body>\n</html>")
+			File.write(path_to_temp_file, "<html>\n<head>\n<link rel='stylesheet' type='text/css' href='browser_display.css'>\n</head>\n<title>Bible</title>\n<body>\n#{content}\n</body>\n</html>")
 			Launchy.open(path_to_temp_file)
 			puts "Displaying results in browser."
 			run("", false)
