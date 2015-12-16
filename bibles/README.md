@@ -1,6 +1,8 @@
 Bibles
 ======
 
+from https://github.com/honza/bibles
+
 Machine-readable vesions of English translations of the Bible
 
 Available:
