@@ -1,7 +1,7 @@
 require 'launchy'
 require 'yaml'
 require 'time'
-require './correct_order_bibles.rb' #gives us global variables $bible_collection, $abbreviations, $replacements
+require './bible_organizer.rb' #gives us global variables $bible_collection, $abbreviations, $replacements
 
 module Menuable
 	def make_numbered_list(array)
@@ -43,6 +43,7 @@ module Displayable
 	def wrap(s, width = 70, leading_numeral)
 		if leading_numeral.to_i < 10 and leading_numeral.to_i != 0
 			indent = "   "
+		# Make a larger indentation for two-digit numbers
 		elsif leading_numeral.to_i >= 10
 			indent = "    "
 		else
@@ -57,7 +58,7 @@ module Displayable
 	end
 
 	
-	def display(content, destination = 'terminal', path_to_temp_file = './temp_contents.html')	
+	def display(content, destination = 'terminal', path_to_temp_file = './browser/temp_contents.html')	
 		case destination
 		when 'Terminal'
 			puts strip_html(content)
@@ -266,12 +267,16 @@ end
 include Menuable
 include Displayable
 
+
+bible_collection = File.open("bible_collection.marshal", "r"){|from_file| Marshal.load(from_file)}
+
+
 clear_screen
 puts "Choose a Bible Version:"
-version_to_load = user_choice($bible_collection.keys)
+version_to_load = user_choice(bible_collection.keys)
 display_options = ["Terminal", "Browser"]
 puts "Choose where to display the Bible text:"
 where_to_display = user_choice(display_options)
 
-bible_to_run = Bible.new("#{version_to_load.upcase}", $bible_collection[version_to_load], where_to_display)
+bible_to_run = Bible.new("#{version_to_load.upcase}", bible_collection[version_to_load], where_to_display)
 bible_to_run.run("Welcome")
