@@ -7,10 +7,10 @@ src: url('fonts/open_sans/Open%20Sans%20300.ttf') format('ttf');
 
 body {
 	font-family: 'Open Sans', times, arial, sans-serif;
-	font-weight: 300;
+	font-weight: 500;
 	padding: 20px;
 	width: 100%;
-	background: url('bluebg.jpg') no-repeat center center fixed;
+	background: url('bg-trees.jpg') no-repeat center center fixed;
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	-o-background-size: cover;
@@ -20,7 +20,7 @@ body {
 .passage {
 	width: 60%;
 	padding: 20px;
-	background: rgba(0, 0, 0, .35);
+	background: rgba(0, 0, 0, .55);
 	color: #fff;
 	margin: 10px auto 30px;
 	border-radius: 8px;
