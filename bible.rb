@@ -18,7 +18,7 @@ module Menuable
 			puts "** Invalid Selection ** \n\n" if first_try == false
 			make_numbered_list(list)
 			print "#{prompt} (1"
-		   print " - #{list.count}" if list.count > 1
+		    print " - #{list.count}" if list.count > 1
 			print "): "
 			chosen_numeral = gets.chomp.strip.to_i
 			first_try = false

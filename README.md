@@ -1,5 +1,5 @@
 # bible
-(Teaching myself Ruby) A command-line app to look up Bible passages and display them either in terminal or browser
+(Teaching myself Ruby with Treehouse.com) A command-line app to look up Bible passages and display them either in terminal or browser
 
 Bible texts in json format taken from https://github.com/honza/bibles
 
