@@ -7,7 +7,7 @@ Launchy module is required for displaying results in the browser.
 - "gem install launchy"
 
 ### To run:
-- "cd <path/to/repo>"
+- "cd path/to/repo"
 - "ruby ./bible.rb"
 
 ## Attribution
