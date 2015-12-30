@@ -11,3 +11,5 @@ Type "gem install launchy"
 
 To run,
 Type "ruby bible.rb".
+
+
