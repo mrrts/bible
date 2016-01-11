@@ -8,7 +8,8 @@ src: url('fonts/open_sans/Open%20Sans%20300.ttf') format('ttf');
 body {
 	font-family: 'Open Sans', times, arial, sans-serif;
 	font-weight: 500;
-	padding: 20px;
+	font-size: 16px;
+	padding: 90px 20px 20px 20px;
 	width: 100%;
 	background: url('bg-trees.jpg') no-repeat center center fixed;
 	-webkit-background-size: cover;
@@ -18,8 +19,22 @@ body {
 	overflow-x: hidden;
 }
 
+body.alt1 {
+	background-image: url('bluebg.jpg');
+}
+
+.navbar-inverse {
+	/*background: rgba(0, 0, 0, 0.25);*/
+	background: none;
+	border: 0px;
+}
+
+.settings-icon {
+	font-size: 20px;
+	text-shadow: 1px 1px 2px #252525;
+}
+
 .passage {
-	width: 60%;
 	padding: 20px;
 	background: rgba(0, 0, 0, .55);
 	color: #fff;
@@ -33,9 +48,25 @@ body {
 	font-weight: 700;
 }
 
+.more-icon {
+	font-size: 14px;
+	margin-left: 10px;
+	color: #fff;
+}
+
+iframe {
+	width: 100%;
+	height: 70vh;
+	position: relative;
+}
+
 .passage p.verse {
 	margin-left: 55px;
 	text-indent: -28px;
+}
+
+.passage .verse.single-digit {
+	text-indent: -19px;
 }
 
 .verse_number {

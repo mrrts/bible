@@ -58,7 +58,7 @@ module Displayable
 	end
 
 	
-	def display(content, destination = 'Terminal', path_to_temp_file = './browser/temp_contents.html', path_to_template = './browser/template.html')	
+	def display(content, destination = 'Terminal', path_to_temp_file = './browser/index.html', path_to_template = './browser/template.html')	
 		case destination
 		when 'Terminal'
 			puts strip_html(content)
@@ -202,6 +202,7 @@ class Bible
 			chapter_number += 30
 		end
 		display(assembled_psalms, where_to_display) if display_it == true
+		assembled_psalms += make_passage("John #{date_day}") if date_day < 22
 		return assembled_psalms
 	end
 
@@ -256,7 +257,9 @@ class Bible
 		
 		verses.sort_by(&:to_i).each do |verse|
 			verse_text = wrap(bible[book][chapter][verse], 70, verse)
-			content += "\n<p class='verse'>\n<span class='verse_number'>#{verse}.</span> " + verse_text + "</p>\n\n"
+			content += "\n<p class='verse"
+			content += " single-digit" if verse.to_i < 10
+			content += "'>\n<span class='verse_number'>#{verse}.</span> " + verse_text + "</p>\n\n"
 		end
 		
 		return content += "\n<div class='citation'>- #{version}</div>\n#{separator}\n</div><!--.passage-->\n" 
