@@ -58,14 +58,15 @@ module Displayable
 	end
 
 	
-	def display(content, destination = 'terminal', path_to_temp_file = './browser/temp_contents.html')	
+	def display(content, destination = 'Terminal', path_to_temp_file = './browser/index.html', path_to_template = './browser/template.html')	
 		case destination
 		when 'Terminal'
 			puts strip_html(content)
 			run("", false)
 		when 'Browser'	
 			content = content.gsub(separator, "\n")
-			File.write(path_to_temp_file, "<html>\n<head>\n<link rel='stylesheet' type='text/css' href='browser_display.css'>\n</head>\n<title>Bible</title>\n<body>\n#{content}\n</body>\n</html>")
+			htmlContent = File.read(path_to_template).gsub('{% content %}', content) # replace template token
+			File.write(path_to_temp_file, htmlContent)
 			Launchy.open(path_to_temp_file)
 			puts "Displaying results in browser."
 			run("", false)
@@ -201,6 +202,7 @@ class Bible
 			chapter_number += 30
 		end
 		display(assembled_psalms, where_to_display) if display_it == true
+		assembled_psalms += make_passage("John #{date_day}") if date_day < 22
 		return assembled_psalms
 	end
 
@@ -255,7 +257,9 @@ class Bible
 		
 		verses.sort_by(&:to_i).each do |verse|
 			verse_text = wrap(bible[book][chapter][verse], 70, verse)
-			content += "<p class='verse'>\n<span class='verse_number'>#{verse}.</span> " + verse_text + "</p>"
+			content += "\n<p class='verse"
+			content += " single-digit" if verse.to_i < 10
+			content += "'>\n<span class='verse_number'>#{verse}.</span> " + verse_text + "</p>\n\n"
 		end
 		
 		return content += "\n<div class='citation'>- #{version}</div>\n#{separator}\n</div><!--.passage-->\n" 
