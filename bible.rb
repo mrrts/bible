@@ -202,13 +202,14 @@ class Bible
 			chapter_number += 30
 		end
 		display(assembled_psalms, where_to_display) if display_it == true
-		assembled_psalms += make_passage("John #{date_day}") if date_day < 22
 		return assembled_psalms
 	end
 
 
 	def proverb_and_psalms_of_the_day
 		assembled_passages = proverb_of_the_day(false) + psalms_of_the_day(false)
+		# Add bonus chapter from John (small hack for now)
+		assembled_passages += make_passage("John #{Time.now.day}") if Time.now.day < 22
 		display(assembled_passages, where_to_display)
 	end
 
